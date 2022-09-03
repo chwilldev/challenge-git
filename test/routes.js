@@ -9,7 +9,9 @@ var Things = require('../lib/models/things')
 
 tape('healthcheck', function (t) {
   var url = '/health'
-  servertest(server(), url, {encoding: 'json'}, function (err, res) {
+  servertest(server(), url, {
+    encoding: 'json'
+  }, function (err, res) {
     t.ifError(err, 'no error')
 
     t.equal(res.statusCode, 200, 'correct statusCode')
@@ -20,7 +22,9 @@ tape('healthcheck', function (t) {
 
 tape('not found', function (t) {
   var url = '/404'
-  servertest(server(), url, {encoding: 'json'}, function (err, res) {
+  servertest(server(), url, {
+    encoding: 'json'
+  }, function (err, res) {
     t.ifError(err, 'no error')
 
     t.equal(res.statusCode, 404, 'correct statusCode')
@@ -30,11 +34,15 @@ tape('not found', function (t) {
 })
 
 tape('should get value', function (t) {
-  var val = {some: 'test object'}
+  var val = {
+    some: 'test object'
+  }
   Things.put('test-key', val, function (err) {
     t.ifError(err, 'no error')
     var url = '/things/get/test-key'
-    servertest(server(), url, {encoding: 'json'}, function (err, res) {
+    servertest(server(), url, {
+      encoding: 'json'
+    }, function (err, res) {
       t.ifError(err, 'no error')
 
       t.equal(res.statusCode, 200, 'correct statusCode')
@@ -46,13 +54,18 @@ tape('should get value', function (t) {
 
 tape('should put values', function (t) {
   var url = '/things/put/test-key2'
-  var opts = { method: 'POST', encoding: 'json' }
-  var val = {some: 'other test object'}
+  var opts = {
+    method: 'POST',
+    encoding: 'json'
+  }
+  var val = {
+    some: 'other test object'
+  }
 
   servertest(server(), url, opts, onResponse)
     .end(JSON.stringify(val))
 
-  function onResponse (err, res) {
+  function onResponse(err, res) {
     t.ifError(err, 'no error')
     t.equal(res.statusCode, 200, 'correct statusCode')
 
@@ -67,17 +80,24 @@ tape('should put values', function (t) {
 tape('should get stream', function (t) {
   var url = '/things/stream/test-key/test-key3?format=ndjson'
 
-  var expected = [
-    { some: 'test object' },
-    { some: 'other test object' }
+  var expected = [{
+      some: 'test object'
+    },
+    {
+      some: 'other test object'
+    }
   ]
 
   var lines = []
 
   servertest(server(), url)
     .pipe(split())
-    .on('error', function (err) { t.ifError(err, 'no error') })
-    .on('data', function (line) { lines.push(JSON.parse(line)) })
+    .on('error', function (err) {
+      t.ifError(err, 'no error')
+    })
+    .on('data', function (line) {
+      lines.push(JSON.parse(line))
+    })
     .on('end', function () {
       t.deepEqual(lines, expected, 'response should match')
       t.end()
@@ -86,11 +106,33 @@ tape('should get stream', function (t) {
 
 tape('should get echo', function (t) {
   var url = '/echo?one=1&two=2'
-  servertest(server(), url, {encoding: 'json'}, function (err, res) {
+  servertest(server(), url, {
+    encoding: 'json'
+  }, function (err, res) {
     t.ifError(err, 'no error')
 
     t.equal(res.statusCode, 200, 'correct statusCode')
-    t.deepEqual(res.body, {one: '1', two: '2'}, 'values should match')
+    t.deepEqual(res.body, {
+      one: '1',
+      two: '2'
+    }, 'values should match')
+    t.end()
+  })
+})
+tape('should get reverse', function (t) {
+  var expected = {
+    input: 'stringtoreverse',
+    output: 'esreverotgnirts'
+  }
+
+  var url = '/reverse/' + expected.input
+  servertest(server(), url, {
+    encoding: 'json'
+  }, function (err, res) {
+    t.ifError(err, 'no error')
+
+    t.equal(res.statusCode, 200, 'correct statusCode')
+    t.deepEqual(res.body, expected, 'values should match')
     t.end()
   })
 })
